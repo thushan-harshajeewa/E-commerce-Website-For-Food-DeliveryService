@@ -1,0 +1,75 @@
+    
+_________________________________________________________________________--    
+    try:
+
+        product=Product.objects.get(pk=id)
+        serialize=productSerializer(product)
+        return Response(serialize.data)
+    
+    except Product.DoesNotExist: 
+        return Response(status=404)
+__________________________________________________________________________
+
+**Product Serializer old 
+class productSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    title=serializers.CharField(max_length=255)
+    price=serializers.DecimalField(max_digits=10,decimal_places=7,source='unit_price')
+    unit_price_with_tax=serializers.SerializerMethodField(method_name='get_unit_price_with_tax')
+    collection=serializers.StringRelatedField()
+    collection=serializers.PrimaryKeyRelatedField(queryset=Collection.objects.all())
+
+_________________________________________________________________________
+
+class productSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    title=serializers.CharField(max_length=255)
+    price=serializers.DecimalField(max_digits=10,decimal_places=7,source='unit_price')
+    unit_price_with_tax=serializers.SerializerMethodField(method_name='get_unit_price_with_tax')
+    collection=collectionSerializer()
+    collection=serializers.HyperlinkedRelatedField(queryset=Collection.objects.all()
+                                                   , view_name='collection_details')
+
+
+@api_view()
+def product(request,id):
+    product=get_object_or_404(Product,pk=id)
+    serialize=productSerializer(product,context={'request': request})
+    return Response(serialize.data)
+_________________________________________________________________________
+
+    elif request.method=='POST':
+        serialize=productSerializer(data=request.data)
+        if serialize.is_valid():
+            serialize.validated_data
+            return Response('ok')
+        else:
+            return Response(serialize.errors,status=status.HTTP_400_BAD_REQUEST)
+
+_________________________________________________________________________
+
+
+
+ {
+    "id": 1,
+    "title": "Bread Ww Cluster",
+    "unit_price": 4.0,
+    "slug": "-",
+    "inventory": 11,
+    "collection": 6
+    
+}
+
+
+{
+    "id": 2,
+    "title": "Island Oasis - Raspberry",
+    "unit_price": 84.64,
+    "slug": "-",
+    "inventory": 40,
+    "collection": 3
+    
+}
+
+
+

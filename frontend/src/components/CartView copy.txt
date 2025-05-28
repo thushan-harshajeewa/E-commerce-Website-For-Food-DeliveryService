@@ -1,0 +1,228 @@
+import {
+  HStack,
+  Text,
+  Box,
+  VStack,
+  useNumberInput,
+  Button,
+  Input,
+  Image,
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  CloseButton,
+  useDisclosure,
+  AlertDialogFooter,
+} from "@chakra-ui/react";
+
+import { useNavigate } from "react-router-dom";
+import { Cart, CartItem } from "../App";
+import ManageCart from "./AddToCart";
+import "./css/AlertPopup.css";
+import cartEmpty from "../assets/emptycart.png";
+import plusButton from "../assets/plusButton.png";
+
+interface CartItemQuantity {
+  id: number;
+  quantity: number;
+}
+
+interface ManageCartItems {
+  AllCartItems: Cart | undefined;
+  cartCondition: () => void;
+  showAlert: (visible: boolean, status: string) => void;
+  CartLabelVisible: (visible: boolean) => void;
+}
+
+function CartView({
+  AllCartItems,
+  cartCondition,
+  showAlert,
+  CartLabelVisible,
+}: ManageCartItems) {
+  const navigate = useNavigate();
+  const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
+    useNumberInput({
+      step: 1,
+
+      precision: 0,
+    });
+  const inc = getIncrementButtonProps();
+  const dec = getDecrementButtonProps();
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = useRef()
+
+  const {
+    isOpen: isVisible,
+    onClose,
+    onOpen,
+  } = useDisclosure({ defaultIsOpen: false });
+
+  if (AllCartItems?.items.length !== 0) {
+    CartLabelVisible(true);
+    return (
+      <>
+        {isVisible && (
+          <Alert
+            status="success"
+            position={"fixed"}
+            top={"200px"}
+            width={"800px"}
+            height={"300px"}
+            zIndex={10}
+            bg={"red"}
+          >
+            <Box>
+              <AlertTitle>Warning</AlertTitle>
+              <AlertDescription>
+                <Button>sdasd</Button>
+                <Button marginY={"100px"}>sdasd</Button>
+              </AlertDescription>
+            </Box>
+            <CloseButton
+              alignSelf="flex-start"
+              position="relative"
+              right={-1}
+              top={-1}
+              onClick={onClose}
+            />
+          </Alert>
+        )}
+        <Box className="visible">
+          <VStack spacing={10}>
+            {AllCartItems?.items.map((cartItem) => (
+              <Box>
+                <HStack spacing={8}>
+                  <Box>
+                    <Text fontSize={"3xl"}>{cartItem.product.title}</Text>
+                    <Text>
+                      Choice of Size
+                      <Text fontWeight={"bold"}>
+                        {cartItem.item_price_method}
+                      </Text>
+                    </Text>
+                    <HStack maxW="200px" marginTop={"30px"}>
+                      <Button
+                        {...inc}
+                        onClick={() => {
+                          ManageCart.UpdateCart(
+                            AllCartItems.id,
+                            cartItem.id,
+                            cartItem.quantity + 1
+                          );
+                          cartCondition();
+                        }}
+                      >
+                        +
+                      </Button>
+                      <Input value={cartItem.quantity} />
+                      <Button
+                        {...dec}
+                        onClick={() => {
+                          ManageCart.UpdateCart(
+                            AllCartItems.id,
+                            cartItem.id,
+                            cartItem.quantity - 1
+                          );
+                          cartCondition();
+                        }}
+                      >
+                        -
+                      </Button>
+                    </HStack>
+                  </Box>
+                  <Box>
+                    {cartItem.product.images.map((i) => (
+                      <Image marginLeft={6} boxSize={"130px"} src={i.image} />
+                    ))}
+                    <Text marginLeft={6} marginTop={6}>
+                      Unit Price
+                      <Text fontSize={"2xl"} fontWeight={"bold"}>
+                        {cartItem.unit_price}
+                      </Text>
+                    </Text>
+                  </Box>
+                  <Button colorScheme="red" onClick={onOpen}>
+                    Delete Customer
+                  </Button>
+                  
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+              Delete Customer
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure? You can't undo this action afterwards.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button colorScheme='red'                     onClick={() => {
+                      showAlert(true, "remove");
+                      ManageCart.DeleteCartItem(AllCartItems.id, cartItem.id);
+                      cartCondition();
+                      onOpen();
+                      onClose
+                    }} ml={3}>
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+                  <Button
+                    marginLeft={7}
+                    onClick={() => {
+                      showAlert(true, "remove");
+                      ManageCart.DeleteCartItem(AllCartItems.id, cartItem.id);
+                      cartCondition();
+                      onOpen();
+                    }}
+                  >
+                    Remove From Cart
+                  </Button>
+                </HStack>
+              </Box>
+            ))}
+          </VStack>
+        </Box>
+      </>
+    );
+  } else {
+    CartLabelVisible(false);
+    return (
+      <>
+        <Box>
+          <Image marginX={"200px"} src={cartEmpty} />
+          <Image
+            cursor={"pointer"}
+            marginX={"400px"}
+            width={"100px"}
+            height={"100px"}
+            opacity={0.5}
+            _hover={{ opacity: 1 }}
+            src={plusButton}
+            onClick={() => navigate("/home-menu")}
+          />
+          <Text marginX={"380px"} fontSize={"3xl"}>
+            Add Items
+          </Text>
+        </Box>
+      </>
+    );
+  }
+}
+
+export default CartView;
+//()=>quantity?.map((item)=>item.id===cartItem.id?item.quantity:unde)

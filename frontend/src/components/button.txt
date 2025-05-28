@@ -1,0 +1,11 @@
+                  <Button
+                    marginLeft={7}
+                    onClick={() => {
+                      showAlert(true, "remove");
+                      ManageCart.DeleteCartItem(AllCartItems.id, cartItem.id);
+                      cartCondition();
+                      onOpen();
+                    }}
+                  >
+                    Remove From Cart
+                  </Button>

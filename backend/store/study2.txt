@@ -1,0 +1,172 @@
+from django.shortcuts import render,get_object_or_404
+from django.db.models import Count
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from .models import Product,Collection
+from .serializer import productSerializer,collectionSerializer
+
+
+
+@api_view(['GET',"PUT","DELETE"])
+def product(request,id):
+    product=get_object_or_404(Product,pk=id)
+    if request.method=='GET':
+        serialize=productSerializer(product,context={'request': request})
+        return Response(serialize.data)
+    elif request.method=='PUT':
+        serialize=productSerializer(product,data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data,status=status.HTTP_426_UPGRADE_REQUIRED)
+    
+    elif request.method=="DELETE":
+        if product.orderitem_set.count()>0:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        serialize=product.delete()
+        return Response({'error':'Product is deleted'})
+
+
+
+@api_view(['GET','POST'])
+def productList(request):
+    if request.method=='GET':
+
+        product=Product.objects.select_related('collection').all()
+        serialize=productSerializer(product,many=True,context={'request': request})
+        return Response(serialize.data)
+    elif request.method=='POST':
+        serialize=productSerializer(data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data)
+    
+
+
+@api_view()
+def collection_details(request,pk):
+    collection=Collection.objects.annotate(product_count=Count('product')).get(pk=pk)
+    serialize=collectionSerializer(collection)
+    return Response(serialize.data)
+    
+
+@api_view(['GET','POST'])
+def Collection_list(request):
+    collection=Collection.objects.all()
+    if request.method=="GET":
+        serialize=collectionSerializer(collection,many=True)
+        return Response(serialize.data)
+    
+    elif request.method=='POST':
+        serialize=collectionSerializer(request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data,status=status.HTTP_201_CREATED)
+
+
+
+@api_view(['GET','PUT','DELETE'])
+def collection_details(request,pk):
+    collection=Collection.objects.annotate(product_count=Count('products')).get(pk=pk)
+    if request.method=='GET':
+        serialize=collectionSerializer(collection)
+        return Response(serialize.data)
+    
+    if request.method=='PUT':
+        serialize=collectionSerializer(collection,data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data,status=status.HTTP_426_UPGRADE_REQUIRED)
+    
+    if request.method=='DELETE':
+        if collection.products.count()>0:
+            return Response({'warning':'cannot be deleted'},status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        collection.delete()
+        return Response({'error':'Item is deleted'})
+
+
+
+
+
+        ___________________________________________________________________________________________________
+
+
+
+
+
+        from django.shortcuts import render,get_object_or_404
+from django.db.models import Count
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework import status
+from .models import Product,Collection
+from .serializer import productSerializer,collectionSerializer
+
+
+class ProductName(APIView):
+    def get(self,request,id):
+        product=get_object_or_404(Product,pk=id)
+        serialize=productSerializer(product,context={'request': request})
+        return Response(serialize.data)
+    
+    def put(self,request,id):
+        product=get_object_or_404(Product,pk=id)
+        serialize=productSerializer(product,data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data,status=status.HTTP_426_UPGRADE_REQUIRED)
+    
+    def delete(self,request,id):
+        product=get_object_or_404(Product,pk=id)
+        if product.orderitem_set.count()>0:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        serialize=product.delete()
+        return Response({'error':'Product is deleted'})
+
+        
+class ProductList(APIView):
+    def get(self,request):
+        product=Product.objects.select_related('collection').all()
+        serialize=productSerializer(product,many=True,context={'request': request})
+        return Response(serialize.data)
+    
+    def post(self,request):
+        serialize=productSerializer(data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data)
+
+
+
+
+
+    
+
+
+@api_view()
+def collection_details(request,pk):
+    collection=Collection.objects.annotate(product_count=Count('product')).get(pk=pk)
+    serialize=collectionSerializer(collection)
+    return Response(serialize.data)
+    
+
+@api_view(['GET','POST'])
+def Collection_list(request):
+    collection=Collection.objects.annotate(product_count=Count('product')).all()
+    if request.method=="GET":
+        serialize=collectionSerializer(collection,many=True)
+        return Response(serialize.data)
+    
+    elif request.method=='POST':
+        serialize=collectionSerializer(request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data,status=status.HTTP_201_CREATED)
+
+
+        
+    
+
+
