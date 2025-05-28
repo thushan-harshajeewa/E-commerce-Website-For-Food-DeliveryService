@@ -1,0 +1,39 @@
+# === General Ignore Rules ===
+*.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.DS_Store
+
+# === Node/React (Frontend) ===
+/frontend/node_modules/
+/frontend/dist/
+/frontend/dist-ssr/
+/frontend/*.local
+
+# === Django/Python (Backend) ===
+/backend/__pycache__/
+/backend/*.pyc
+/backend/db.sqlite3
+/backend/staticfiles/
+/backend/.env
+
+# === Frontend/Backend Environment Files ===
+/frontend/.env
+/backend/.env
+
+# === Editor/IDE ===
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === Virtual Environments ===
+venv/
